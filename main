@@ -1,0 +1,390 @@
+tas
+        
+        def __init__(self,posinicial,v):#atrbutos
+            self.x=posinicial#variable de posicion de inicio en x
+            self.rectangulo=pygame.Rect(self.x,Ry,rbase,raltura) #medidas y posision
+            self.velocidad=v #velocidad de movimiento
+            
+            
+        def dibujar(self,ventana):#metodo de dibujar
+            pygame.draw.rect(ventana,Color,self.rectangulo) #dibujar la raqueta
+            
+        def movimiento(self): #Tope de movimiento
+            if(self.rectangulo.top <= 100): 
+                self.rectangulo.top=100
+            elif(self.rectangulo.bottom>475):
+                self.rectangulo.bottom=475
+     
+    class limite(pygame.sprite.Sprite): #clase de los limites
+        def __init__(self,posiciony):#atributos
+            self.y=posiciony#variable de posision de inicio en y
+            self.pared=pygame.Rect(Px,self.y,pbase,paltura)#inicializamos la pared
+        
+        def dibujar(self,ventana):#metodo dibujar
+            pygame.draw.rect(ventana,Color,self.pared)#la dibujamos en la ventana
+            
+    class pelota(pygame.sprite.Sprite):
+        def __init__(self,v):
+            self.pelota=pygame.Rect(455,235,10,10)
+            self.velocidad=v
+            self.choque=pygame.mixer.Sound('jugador.wav')
+            self.perder=pygame.mixer.Sound('Lose.wav')
+        def dibujar(self,ventana):
+            pygame.draw.rect(ventana,Color,self.pelota)
+            
+        def mover(self,d,arriba,derecha):            
+            if(d==0 and arriba==True):
+                self.pelota.top-=self.velocidad
+                self.pelota.left-=self.velocidad
+            if(d==0 and arriba==False):
+                self.pelota.top+=self.velocidad
+                self.pelota.left-=self.velocidad
+            if(d==1 and derecha==True):
+                self.pelota.top-=self.velocidad
+                self.pelota.left+=self.velocidad
+            if(d==1 and derecha==False):
+                self.pelota.top-=self.velocidad
+                self.pelota.left-=self.velocidad
+            if(d==2 and arriba==True):
+                self.pelota.top-=self.velocidad
+                self.pelota.left+=self.velocidad
+            if(d==2 and arriba==False):
+                self.pelota.top+=self.velocidad
+                self.pelota.left+=self.velocidad
+            if(d==3 and derecha==True):
+                self.pelota.top+=self.velocidad
+                self.pelota.left+=self.velocidad
+            if(d==3 and derecha==False):
+                self.pelota.top+=self.velocidad
+                self.pelota.left-=self.velocidad
+                
+        def sonido(self,n):
+            if(n==2):
+                self.choque.play()
+            if(n==3):
+                self.perder.play()
+                
+    class marcador(pygame.sprite.Sprite):
+        def __init__(self):
+            pass
+            
+        def dibujar(self,ventana,x,y,inicio):
+            contador=inicio
+            contadorstr=str(contador)
+            fuente=pygame.font.SysFont("Agency FB",80)
+            texto=fuente.render(contadorstr,0,Color)
+            ventana.blit(texto,(x,y))
+    llego=False
+    """
+    ventana
+    """
+    pygame.init() #inicializamos la ventana
+    ventana=pygame.display.set_mode((ancho,alto)) #damos la medida a la ventana
+    pygame.display.set_caption("Pong")#damos titulo a la ventana
+    imagenfondo=pygame.image.load('FondoPong.jpg')#ponemos la imagen de fondo
+    
+    """
+    raquetas
+    """
+    jugador=raqueta(50,30)#creamos el objeto del jugador
+    if(dificulty==1):
+        bot=raqueta(850,2)#creamos el boot
+    if(dificulty==2):
+        bot=raqueta(850,3)#creamos el boot
+    if(dificulty==3):
+        bot=raqueta(850,4)#creamos el boot
+    
+    """
+    paredes
+    """
+    Paredarriba=limite(90)
+    paredabajo=limite(470)
+    
+    """
+    Marcador
+    """
+    Player1=marcador()
+    bot1=marcador()
+    inicio1=0
+    inicio2=0
+    
+    """
+    pelota
+    """
+    if(dificulty==1):
+        ball=pelota(2)
+    if(dificulty==2):
+        ball=pelota(3)
+    if(dificulty==3):
+        ball=pelota(4)
+    juego=True#damos una vida
+    
+    """
+    Musica
+    """
+    pygame.mixer.music.load('Principal.mp3')
+    pygame.mixer.music.play(100)
+    
+    
+    """
+    Funciones
+    """
+    def iniciopelota():
+        
+        d=0
+        arriba=False
+        derecha=False
+        ball.pelota.right=455#Posicion inicial de la pelota
+        ball.pelota.top=235
+        ball.mover(d,arriba,derecha)#direccion
+        time.sleep(0.5)
+        ball.dibujar(ventana)#dibujamos y esperamos
+        time.sleep(1)
+        
+    def teclas():
+        
+        if(player2):
+            if(evento.type==pygame.KEYDOWN):#si el evento es precionar una tecla
+                if(evento.key==pygame.K_UP):#verificamos si es la tecla de hacia arriba
+                    jugador.rectangulo.top-=jugador.velocidad#lo movemos
+                if(evento.key==pygame.K_DOWN):#verificamos si es la tecla asi abajo
+                    jugador.rectangulo.bottom+=jugador.velocidad#lo movemos
+                if(evento.key==pygame.K_w):#verificamos si es la tecla de hacia arriba bot
+                    bot.rectangulo.top-=jugador.velocidad#lo movemos
+                if(evento.key==pygame.K_s):#verificamos si es la tecla asi abajo bot
+                    bot.rectangulo.bottom+=jugador.velocidad#lo movemos
+                    
+        else:
+            if(evento.type==pygame.KEYDOWN):#si el evento es precionar una tecla
+                if(evento.key==pygame.K_UP):#verificamos si es la tecla de hacia arriba
+                    jugador.rectangulo.top-=jugador.velocidad#lo movemos
+                if(evento.key==pygame.K_DOWN):#verificamos si es la tecla asi abajo
+                    jugador.rectangulo.bottom+=jugador.velocidad#lo movemos
+                    
+    while True:#es necesario que este en un while
+        """
+        Verificamos la direccion y decidimos la siguiente de la pelota
+        """
+         
+        if(ball.pelota.colliderect(bot.rectangulo)):
+            d=0
+            derecha=False 
+            ball.sonido(2)
+        elif(ball.pelota.colliderect(paredabajo.pared)):
+            d=1
+            arriba=True
+            ball.sonido(2)
+        elif(ball.pelota.colliderect(jugador.rectangulo)):
+            d=2
+            derecha=True
+            ball.sonido(2)
+        elif(ball.pelota.colliderect(Paredarriba.pared)):
+            d=3
+            arriba=False
+            ball.sonido(2)
+        elif(ball.pelota.right>860):
+            ball.sonido(3)
+            iniciopelota()            
+            inicio2=1+inicio2#sumamos al ganador
+        elif(ball.pelota.left<45):
+            ball.sonido(3)
+            iniciopelota()
+            inicio1=1+inicio1#sumamos al ganador
+        ball.mover(d,arriba,derecha)#direccion en donde se movera
+        
+        if(inicio1==3):
+            if(player2):
+                menu()
+            else:
+                TryAgain()
+            
+        if(inicio2==3):
+            if(player2):
+                menu()
+            elif(dificulty==1):
+                Nivel2()
+            elif(dificulty==2):
+                Nivel3()
+            else:    
+                pygame.mixer.music.load('Victoria.mp3')
+                pygame.mixer.music.play()
+                time.sleep(6)
+                pygame.quit()
+            
+        if(inicio1==2 and llego==False):
+            pygame.mixer.music.load('Nivel3.mpeg')
+            pygame.mixer.music.play(100)
+            llego=True
+            
+        """
+        Movimiento del robot
+        """
+        if(player2==False):#si es de 2 jugadores o de 1
+            move=random.randint(0,5)
+            if(move>0):
+                if(arriba==True):
+                    bot.rectangulo.top-=bot.velocidad
+                else:
+                    bot.rectangulo.bottom+=bot.velocidad
+        """
+        Esperamos un evento
+        
+        """
+        jugador.movimiento()#verificamos si estan en el rango de movimiento
+        bot.movimiento()
+        for evento in pygame.event.get(): #esperamos un evento
+            if evento.type== pygame.QUIT: #si el evento es cerrar la ventana la cerramos
+                pygame.quit()
+                break
+            if(juego==True):#verificamos si esta vivo
+                teclas()
+        
+        """
+        Dibujamos todo lo necesario
+        """
+        ventana.blit(imagenfondo,(0,0))#dibujamos el fondo
+        jugador.dibujar(ventana)#dibujamos a la raqueta del jugador
+        bot.dibujar(ventana)#dibujamos al boot
+        Paredarriba.dibujar(ventana)#dibujamos limite arriba
+        paredabajo.dibujar(ventana)#dibujamos limite abajo
+        ball.dibujar(ventana)#dibujamos l apelota
+        Player1.dibujar(ventana,40,0.5,inicio2)
+        bot1.dibujar(ventana,820,0.5,inicio1)
+        
+        pygame.display.update() #si no se cierra la ventaa se vuelve a cargar
+        
+def menu():
+    
+    ancho=900 #Parametros de la pantalla
+    alto=480
+    Color=pygame.Color(255,255,255)#asiganar Color
+    
+    class Mouse(pygame.sprite.Sprite):
+        
+        def __init__(self,x,y,Cli,sonido):
+            self.Posx=x
+            self.Posy=y
+            self.Clik=Cli
+            self.Seleccionar=pygame.mixer.Sound('Selecion.wav')
+            self.sonido=sonido
+            self.confirm=(1,0,0)
+        def Control(self):
+            
+            if(self.Posx>270 and self.Posy>220 and self.Posy<260 and self.Posx<650):
+                if(self.sonido):
+                    self.Seleccionar.play()
+                    return False
+                if(self.Clik==self.confirm):
+                    pygame.mouse.set_visible
+                    Nivel1()
+                
+            elif(self.Posx>290 and self.Posy>290 and self.Posy<350 and self.Posx<630):
+                if(self.sonido):
+                    self.Seleccionar.play()
+                    return False
+                if(self.Clik==self.confirm):
+                    pygame.mouse.set_visible()
+                    Pingpong(True,1)
+                
+            elif(self.Posx>380 and self.Posy>380 and self.Posy<430 and self.Posx<530):
+                if(self.sonido):
+                    self.Seleccionar.play()
+                    return False
+                if(self.Clik==self.confirm):
+                    pygame.quit()
+                
+            else:
+                return True
+
+        
+    
+    
+    
+    pygame.init() #inicializamos la ventana
+    ventana=pygame.display.set_mode((ancho,alto)) #damos la medida a la ventana
+    pygame.display.set_caption("Pong")#damos titulo a la ventana
+    
+    imagenfondo=pygame.image.load('FondoMenu.jpg')#ponemos la imagen de fondo
+    
+    fuente=pygame.font.SysFont("Ravie",40)
+    Jugador1=fuente.render('Single Player',0,Color)
+    Jugador2=fuente.render('Two Player',0,Color)
+    Salir=fuente.render('Exit',0,Color)
+    sonido=True
+    
+    pygame.mixer.music.load('Menu.mp3')
+    pygame.mixer.music.play(20)
+    
+    
+    while(True):
+        
+        for evento in pygame.event.get(): #esperamos un evento
+            if evento.type== pygame.QUIT: #si el evento es cerrar la ventana la cerramos
+                pygame.quit()
+                break
+            
+        x,y=pygame.mouse.get_pos()
+        c=pygame.mouse.get_pressed()
+        if(sonido):
+            raton=Mouse(x,y,c,sonido)
+            sonido=raton.Control()
+        else:
+            raton=Mouse(x,y,c,False)
+            sonido=raton.Control()
+            
+        ventana.blit(imagenfondo,(0,0))#dibujamos el fondo
+        ventana.blit(Jugador1,(280,220))
+        ventana.blit(Jugador2,(300,300))
+        ventana.blit(Salir,(390,380))
+        pygame.display.update()
+
+def Presentacion1():
+    
+    ancho=900 #Parametros de la pantalla
+    alto=480
+    pygame.init() #inicializamos la ventana
+    ventana=pygame.display.set_mode((ancho,alto)) #damos la medida a la ventana
+    pygame.display.set_caption("Pong")#damos titulo a la ventana
+    imagenfondo1=pygame.image.load('IPN.jpg')#ponemos la imagen de fondo
+    pygame.mixer.music.load('IPN.mp3')
+    pygame.mixer.music.play()
+    while(True):
+        
+        for evento in pygame.event.get(): #esperamos un evento
+            if evento.type== pygame.QUIT: #si el evento es cerrar la ventana la cerramos
+                pygame.quit()
+                break
+            
+        ventana.blit(imagenfondo1,(0,0))#dibujamos el fondo
+        pygame.display.update()
+        break
+    
+    time.sleep(7)
+    return      
+
+def Presentacion2():
+    ancho=900 #Parametros de la pantalla
+    alto=480
+    pygame.init() #inicializamos la ventana
+    ventana=pygame.display.set_mode((ancho,alto)) #damos la medida a la ventana
+    pygame.display.set_caption("Pong")#damos titulo a la ventana
+    pygame.mixer.music.load('C-137.mp3')
+    pygame.mixer.music.play() 
+    imagenfondo2=pygame.image.load('Nombre-01.jpg')
+    while(True):
+        
+        for evento in pygame.event.get(): #esperamos un evento
+            if evento.type== pygame.QUIT: #si el evento es cerrar la ventana la cerramos
+                pygame.quit()
+                break
+            
+        ventana.blit(imagenfondo2,(0,0))#dibujamos el fondo
+        pygame.display.update()
+        break
+    
+    time.sleep(3)
+    return 
+
+Presentacion1()
+Presentacion2()
+menu()
